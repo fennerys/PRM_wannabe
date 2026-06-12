@@ -1,0 +1,31 @@
+Implement a combinational 32-bit Arithmetic Logic Unit (ALU) for a RISC-V RV32I processor (the zero-riscy core).
+
+Module name: zeroriscy_alu
+
+Ports:
+  - input  logic [5:0]  operator_i   -- selects the ALU operation (see encoding below)
+  - input  logic [31:0] operand_a_i  -- first operand
+  - input  logic [31:0] operand_b_i  -- second operand
+  - output logic [31:0] adder_result_o -- result of the adder/subtractor only (used by load/store address unit)
+  - output logic [31:0] result_o     -- final ALU result
+
+Operation encoding for operator_i (use these exact parameter values):
+  ALU_ADD  = 6'b011000  -- result = operand_a + operand_b
+  ALU_SUB  = 6'b011001  -- result = operand_a - operand_b
+  ALU_AND  = 6'b010101  -- result = operand_a & operand_b
+  ALU_OR   = 6'b010100  -- result = operand_a | operand_b
+  ALU_XOR  = 6'b010011  -- result = operand_a ^ operand_b
+  ALU_SLL  = 6'b100111  -- result = operand_a << operand_b[4:0]  (logical left shift)
+  ALU_SRL  = 6'b100101  -- result = operand_a >> operand_b[4:0]  (logical right shift)
+  ALU_SRA  = 6'b100100  -- result = $signed(operand_a) >>> operand_b[4:0]  (arithmetic right shift)
+  ALU_SLT  = 6'b000010  -- result = ($signed(operand_a) < $signed(operand_b)) ? 32'd1 : 32'd0
+  ALU_SLTU = 6'b000011  -- result = (operand_a < operand_b) ? 32'd1 : 32'd0
+  ALU_LUI  = 6'b001111  -- result = operand_b (pass through, used for LUI instruction)
+
+Notes:
+- The module is purely combinational (no clock or reset).
+- adder_result_o must reflect operand_a + operand_b for ADD, and operand_a - operand_b for SUB. For all other operations it may output the adder result but this output is primarily used by the load/store unit for address computation.
+- The shift amount is always the lower 5 bits of operand_b.
+- For SLT, treat both operands as signed 32-bit integers.
+- For SLTU, treat both operands as unsigned 32-bit integers.
+- Default result_o for unrecognised opcodes should be 32'd0.
